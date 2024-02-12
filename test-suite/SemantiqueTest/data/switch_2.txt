@@ -1,0 +1,15 @@
+num a;
+bool b;
+enum A {
+    B, C, D
+}
+A var;
+
+switch(b){
+    case 0:
+        a = 3;
+        break;
+    case 1:
+        a = 4;
+        break;
+}

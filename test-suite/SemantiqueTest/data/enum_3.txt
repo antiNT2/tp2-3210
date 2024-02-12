@@ -1,0 +1,4 @@
+enum A {
+    A, B, C, D
+}
+A var;

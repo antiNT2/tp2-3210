@@ -1,0 +1,7 @@
+num a;
+num b;
+
+
+if (a * 5) {
+  b = a;
+}

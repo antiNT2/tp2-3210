@@ -1,0 +1,6 @@
+bool a;
+num b;
+
+
+// erreur operandes
+a = 1 != false;

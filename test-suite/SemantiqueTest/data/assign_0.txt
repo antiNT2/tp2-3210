@@ -1,0 +1,6 @@
+num a;
+num b;
+
+
+a = 1;
+b = true;

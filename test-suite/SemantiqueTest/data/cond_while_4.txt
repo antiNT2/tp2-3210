@@ -1,0 +1,9 @@
+num a;
+num b;
+
+
+while (a / b) {
+  a = 1 ;
+}
+
+  

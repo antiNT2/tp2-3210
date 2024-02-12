@@ -1,0 +1,1 @@
+Identifier var has been declared with the type B that does not exist

@@ -1,0 +1,5 @@
+bool var;
+enum A {
+    B, C, D
+}
+A var;

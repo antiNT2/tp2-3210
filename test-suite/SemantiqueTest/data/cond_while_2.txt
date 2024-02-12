@@ -1,0 +1,9 @@
+num a;
+num b;
+
+
+while (b) {
+  a = 1 ;
+}
+
+  

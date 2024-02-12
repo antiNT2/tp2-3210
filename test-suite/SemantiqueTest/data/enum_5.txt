@@ -1,0 +1,5 @@
+num A;
+enum A {
+    B, C, D, d
+}
+A d;
