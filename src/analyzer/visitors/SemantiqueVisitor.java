@@ -140,6 +140,7 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTIfStmt node, Object data)
     {
         // TODO
+        this.IF++;
         return null;
     }
 
@@ -147,6 +148,7 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTWhileStmt node, Object data)
     {
         // TODO
+        this.WHILE++;
         return null;
     }
 
@@ -157,6 +159,7 @@ public class SemantiqueVisitor implements ParserVisitor
         String varName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
 
         // TODO
+        node.childrenAccept(this, data);
         return null;
     }
 
@@ -164,6 +167,7 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTEnumStmt node, Object data)
     {
         // TODO
+        this.ENUM_VALUES += node.jjtGetNumChildren() - 1;
         return null;
     }
 
@@ -184,7 +188,9 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTExpr node, Object data)
     {
+        // EXPRESSION BASE
         // TODO
+        node.childrenAccept(this, data);
         return null;
     }
 
@@ -200,6 +206,12 @@ public class SemantiqueVisitor implements ParserVisitor
             soit le même des deux côtés de l'égalité/l'inégalité.
         */
         // TODO
+
+        if (node.jjtGetNumChildren() > 1)
+            this.OP += node.jjtGetNumChildren() - 1;
+
+        node.childrenAccept(this, data);
+
         return null;
     }
 
@@ -213,6 +225,10 @@ public class SemantiqueVisitor implements ParserVisitor
     {
         // TODO
         int numChildren = node.jjtGetNumChildren();
+
+        if (numChildren > 1)
+            this.OP++;
+
         for (int i = 0; i < numChildren; i++)
         {
             DataStruct d = new DataStruct();
@@ -226,6 +242,10 @@ public class SemantiqueVisitor implements ParserVisitor
     {
         // TODO
         int numChildren = node.jjtGetNumChildren();
+
+        if (numChildren > 1)
+            this.OP++;
+
         for (int i = 0; i < numChildren; i++)
         {
             DataStruct d = new DataStruct();
@@ -259,6 +279,7 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTNotExpr node, Object data)
     {
         // TODO
+
         return null;
     }
 
@@ -266,6 +287,9 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTUnaExpr node, Object data)
     {
         // TODO
+        int numberOfOps = node.getOps().size();
+        if (numberOfOps > 0)
+            this.OP++;
         return null;
     }
 
