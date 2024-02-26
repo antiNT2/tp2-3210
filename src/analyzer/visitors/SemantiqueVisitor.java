@@ -196,7 +196,8 @@ public class SemantiqueVisitor implements ParserVisitor
     {
         // EXPRESSION BASE
         // TODO
-        node.childrenAccept(this, data);
+        DataStruct d = new DataStruct();
+        node.childrenAccept(this, d);
         return null;
     }
 
@@ -216,7 +217,67 @@ public class SemantiqueVisitor implements ParserVisitor
         node.childrenAccept(this, data);
 
         if (node.jjtGetNumChildren() > 1)
+        {
             this.OP += node.jjtGetNumChildren() - 1;
+
+            ((DataStruct) data).type = VarType.Bool;
+
+            String nodeValue = node.getValue();
+            if (!nodeValue.equals("==") && !nodeValue.equals("!="))
+            {
+                // We have a < > <= >=
+
+                int numChildren = node.jjtGetNumChildren();
+
+                for (int i = 0; i < numChildren; i++)
+                {
+                    int oldCounter = this.OP;
+
+                    DataStruct childDataStruct = new DataStruct();
+                    node.jjtGetChild(i).jjtAccept(this, childDataStruct);
+
+                    this.OP = oldCounter;
+
+                    if (childDataStruct.type != VarType.Number)
+                    {
+                        throw new SemantiqueError("Invalid type in expression");
+                    }
+                }
+            } else
+            {
+                int numChildren = node.jjtGetNumChildren();
+
+                VarType firstType = VarType.Unknown;
+
+                for (int i = 0; i < numChildren; i++)
+                {
+                    int oldCounter = this.OP;
+
+                    DataStruct childDataStruct = new DataStruct();
+                    node.jjtGetChild(i).jjtAccept(this, childDataStruct);
+
+                    this.OP = oldCounter;
+
+                    if (firstType == VarType.Unknown)
+                    {
+                        firstType = childDataStruct.type; // First initialization
+
+                        if (firstType != VarType.Number && firstType != VarType.Bool)
+                        {
+                            throw new SemantiqueError("Invalid type in expression");
+                        }
+
+                    } else
+                    {
+                        if (childDataStruct.type != firstType)
+                        {
+                            throw new SemantiqueError("Invalid type in expression");
+                        }
+                    }
+
+                }
+            }
+        }
 
 
         return null;
@@ -238,8 +299,16 @@ public class SemantiqueVisitor implements ParserVisitor
 
         for (int i = 0; i < numChildren; i++)
         {
-            DataStruct d = new DataStruct();
-            node.jjtGetChild(i).jjtAccept(this, d);
+            DataStruct d = ((DataStruct) data);
+            node.jjtGetChild(i).jjtAccept(this, data);
+
+            if (numChildren > 1)
+            {
+                if (d.type != VarType.Number)
+                {
+                    throw new SemantiqueError("Invalid type in expression");
+                }
+            }
         }
         return null;
     }
@@ -255,8 +324,18 @@ public class SemantiqueVisitor implements ParserVisitor
 
         for (int i = 0; i < numChildren; i++)
         {
-            DataStruct d = new DataStruct();
+            DataStruct d = (DataStruct) data;
+
             node.jjtGetChild(i).jjtAccept(this, d);
+
+            if (numChildren > 1)
+            {
+                if (d.type != VarType.Number)
+                {
+                    throw new SemantiqueError("Invalid type in expression");
+                }
+            }
+
         }
         return null;
     }
@@ -267,15 +346,69 @@ public class SemantiqueVisitor implements ParserVisitor
         // TODO
 
         int numberOfOps = node.getOps().size();
-        if (numberOfOps > 0)
-            this.OP++;
 
         int numChildren = node.jjtGetNumChildren();
+
+        VarType firstType = VarType.Unknown;
+
         for (int i = 0; i < numChildren; i++)
         {
             DataStruct d = new DataStruct();
             node.jjtGetChild(i).jjtAccept(this, d);
+
+            if (firstType == VarType.Unknown)
+            {
+                firstType = d.type; // First initialization
+            } else
+            {
+                if (d.type != firstType)
+                {
+                    throw new SemantiqueError("Invalid type in expression");
+                }
+            }
         }
+
+//        else
+//        {
+//            int numChildren = node.jjtGetNumChildren();
+//
+//            VarType firstType = VarType.Unknown;
+//
+//            for (int i = 0; i < numChildren; i++)
+//            {
+//                int oldCounter = this.OP;
+//
+//                DataStruct childDataStruct = new DataStruct();
+//                node.jjtGetChild(i).jjtAccept(this, childDataStruct);
+//
+//                this.OP = oldCounter;
+//
+//                if (firstType == VarType.Unknown)
+//                {
+//                    firstType = childDataStruct.type; // First initialization
+//
+//                    if (firstType != VarType.Number && firstType != VarType.Bool)
+//                    {
+//                        throw new SemantiqueError("Invalid type in expression");
+//                    }
+//
+//                } else
+//                {
+//                    if (childDataStruct.type != firstType)
+//                    {
+//                        throw new SemantiqueError("Invalid type in expression");
+//                    }
+//                }
+//
+//            }
+//        }
+
+        if (numberOfOps > 0)
+        {
+            this.OP++;
+            ((DataStruct) data).type = VarType.Bool;
+        }
+
         return null;
     }
 
@@ -293,9 +426,20 @@ public class SemantiqueVisitor implements ParserVisitor
         // TODO
         int numberOfOps = node.getOps().size();
         if (numberOfOps > 0)
+        {
+            ((DataStruct) data).type = VarType.Bool;
             this.OP++;
+        }
 
         node.childrenAccept(this, data);
+
+        if (numberOfOps > 0)
+        {
+            if (((DataStruct) data).type != VarType.Bool)
+            {
+                throw new SemantiqueError("Invalid type in expression");
+            }
+        }
 
         return null;
     }
