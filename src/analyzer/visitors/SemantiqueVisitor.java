@@ -210,6 +210,7 @@ public class SemantiqueVisitor implements ParserVisitor
         if (node.jjtGetNumChildren() > 1)
             this.OP += node.jjtGetNumChildren() - 1;
 
+
         node.childrenAccept(this, data);
 
         return null;
@@ -258,6 +259,11 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTBoolExpr node, Object data)
     {
         // TODO
+
+        int numberOfOps = node.getOps().size();
+        if (numberOfOps > 0)
+            this.OP++;
+
         int numChildren = node.jjtGetNumChildren();
         for (int i = 0; i < numChildren; i++)
         {
@@ -279,6 +285,11 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTNotExpr node, Object data)
     {
         // TODO
+        int numberOfOps = node.getOps().size();
+        if (numberOfOps > 0)
+            this.OP++;
+
+        node.childrenAccept(this, data);
 
         return null;
     }
@@ -290,6 +301,9 @@ public class SemantiqueVisitor implements ParserVisitor
         int numberOfOps = node.getOps().size();
         if (numberOfOps > 0)
             this.OP++;
+
+        node.childrenAccept(this, data);
+
         return null;
     }
 
