@@ -117,8 +117,6 @@ public class SemantiqueVisitor implements ParserVisitor
             varName = ((ASTIdentifier) node.jjtGetChild(1)).getValue();
             varType = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
 
-            // VarType detectedVarType = GetEnumVarTypeFromString(varType);
-
             if (!IsValidType(varType))
             {
                 throw new SemantiqueError(String.format("Identifier %s has been declared with the type %s that does not exist", varName, varType));
@@ -127,7 +125,6 @@ public class SemantiqueVisitor implements ParserVisitor
 
 
         VarType detectedVarType = GetEnumVarTypeFromString(varType);
-        // SymbolTable.put(varName, detectedVarType);
 
         AddToSymbolTable(varName, detectedVarType);
 
@@ -178,8 +175,6 @@ public class SemantiqueVisitor implements ParserVisitor
         DataStruct d = new DataStruct();
         node.jjtGetChild(0).jjtAccept(this, d);
 
-        // TODO
-
         int numChildren = node.jjtGetNumChildren();
         for (int i = 1; i < numChildren; i++)
         {
@@ -193,7 +188,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTIfStmt node, Object data)
     {
-        // TODO
         this.IF++;
 
         node.childrenAccept(this, data);
@@ -209,7 +203,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTWhileStmt node, Object data)
     {
-        // TODO
         this.WHILE++;
 
         node.childrenAccept(this, data);
@@ -228,7 +221,6 @@ public class SemantiqueVisitor implements ParserVisitor
     {
         String varName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
         SemantiqueVisitor.VarType varType = SymbolTable.get(varName);
-        // TODO
 
         node.jjtGetChild(1).jjtAccept(this, data);
 
@@ -245,7 +237,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTEnumStmt node, Object data)
     {
-        // TODO
         this.ENUM_VALUES += node.jjtGetNumChildren() - 1;
 
         // We created an enum, let's register it
@@ -270,7 +261,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTSwitchStmt node, Object data)
     {
-        // TODO
         String switchVarName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
         VarType varType = SymbolTable.get(switchVarName);
 
@@ -288,7 +278,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTCaseStmt node, Object data)
     {
-        // TODO
 
         Node caseNode = node.jjtGetChild(0);
 
@@ -337,7 +326,6 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTExpr node, Object data)
     {
         // EXPRESSION BASE
-        // TODO
 
         node.childrenAccept(this, data);
         return null;
@@ -354,7 +342,6 @@ public class SemantiqueVisitor implements ParserVisitor
             - Les opérateurs == et != peuvent être utilisé pour les nombres et les booléens, mais il faut que le type
             soit le même des deux côtés de l'égalité/l'inégalité.
         */
-        // TODO
 
         node.childrenAccept(this, data);
 
@@ -433,7 +420,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTAddExpr node, Object data)
     {
-        // TODO
         int numChildren = node.jjtGetNumChildren();
 
         if (numChildren > 1)
@@ -458,7 +444,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTMulExpr node, Object data)
     {
-        // TODO
         int numChildren = node.jjtGetNumChildren();
 
         if (numChildren > 1)
@@ -485,8 +470,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTBoolExpr node, Object data)
     {
-        // TODO
-
         int numberOfOps = node.getOps().size();
 
         int numChildren = node.jjtGetNumChildren();
@@ -530,7 +513,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTNotExpr node, Object data)
     {
-        // TODO
         int numberOfOps = node.getOps().size();
         if (numberOfOps > 0)
         {
@@ -554,7 +536,6 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTUnaExpr node, Object data)
     {
-        // TODO
         int numberOfOps = node.getOps().size();
         if (numberOfOps > 0)
             this.OP++;
