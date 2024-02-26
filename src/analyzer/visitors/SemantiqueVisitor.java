@@ -6,6 +6,7 @@ import analyzer.ast.*;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Created: 19-01-10
@@ -83,7 +84,19 @@ public class SemantiqueVisitor implements ParserVisitor
     {
         DataStruct d = new DataStruct();
         node.childrenAccept(this, d);
-        this.VAR = SymbolTable.size();
+        this.VAR = 0;
+
+        for (HashMap.Entry<String, VarType> entry : SymbolTable.entrySet())
+        {
+            String key = entry.getKey();
+            VarType value = entry.getValue();
+
+            if (value != VarType.EnumValue && value != VarType.EnumType)
+            {
+                this.VAR++;
+            }
+        }
+
         m_writer.print(String.format("{VAR:%d, WHILE:%d, IF:%d, ENUM_VALUES:%d, OP:%d}", this.VAR, this.WHILE, this.IF, this.ENUM_VALUES, this.OP));
         return null;
     }
@@ -95,14 +108,54 @@ public class SemantiqueVisitor implements ParserVisitor
         String varName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
         String varType = node.getValue();
 
-        if (SymbolTable.containsKey(varName))
+        int childrenCount = node.jjtGetNumChildren();
+
+        if (childrenCount > 1)
+        {
+            // This means it's an enum declaration
+
+            varName = ((ASTIdentifier) node.jjtGetChild(1)).getValue();
+            varType = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
+
+            // VarType detectedVarType = GetEnumVarTypeFromString(varType);
+
+            if (!IsValidType(varType))
+            {
+                throw new SemantiqueError(String.format("Identifier %s has been declared with the type %s that does not exist", varName, varType));
+            }
+        }
+
+
+        VarType detectedVarType = GetEnumVarTypeFromString(varType);
+        // SymbolTable.put(varName, detectedVarType);
+
+        AddToSymbolTable(varName, detectedVarType);
+
+        return null;
+    }
+
+    boolean IsValidType(String type)
+    {
+        if (type.equals("num"))
+            return true;
+
+        if (type.equals("bool"))
+            return true;
+
+        if (SymbolTable.containsKey(type) && SymbolTable.get(type) == VarType.EnumType)
+            return true;
+
+        return false;
+    }
+
+    void AddToSymbolTable(String varName, VarType varType)
+    {
+        if (SymbolTable.containsKey(varName) && varType != null)
         {
             throw new SemantiqueError("Identifier " + varName + " has multiple declarations");
         }
 
-        SymbolTable.put(varName, GetEnumVarTypeFromString(varType));
-
-        return null;
+        SymbolTable.put(varName, varType);
     }
 
     @Override
@@ -145,7 +198,7 @@ public class SemantiqueVisitor implements ParserVisitor
 
         node.childrenAccept(this, data);
 
-        if (((DataStruct)data).type != VarType.Bool)
+        if (((DataStruct) data).type != VarType.Bool)
         {
             throw new SemantiqueError("Invalid type in condition");
         }
@@ -161,7 +214,7 @@ public class SemantiqueVisitor implements ParserVisitor
 
         node.childrenAccept(this, data);
 
-        if (((DataStruct)data).type != VarType.Bool)
+        if (((DataStruct) data).type != VarType.Bool)
         {
             throw new SemantiqueError("Invalid type in condition");
         }
@@ -181,7 +234,7 @@ public class SemantiqueVisitor implements ParserVisitor
 
         DataStruct d = (DataStruct) data;
 
-        if(d.type != varType)
+        if (d.type != varType && !(d.type == VarType.EnumValue && varType == VarType.EnumVar))
         {
             throw new SemantiqueError(String.format("Invalid type in assignation of Identifier %s", varName));
         }
@@ -194,6 +247,23 @@ public class SemantiqueVisitor implements ParserVisitor
     {
         // TODO
         this.ENUM_VALUES += node.jjtGetNumChildren() - 1;
+
+        // We created an enum, let's register it
+
+        String enumTypeName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
+
+        //SymbolTable.put(enumTypeName, VarType.EnumType);
+        AddToSymbolTable(enumTypeName, VarType.EnumType);
+
+        int numberOfChildren = node.jjtGetNumChildren();
+
+        for (int i = 1; i < numberOfChildren; i++)
+        {
+            String childName = ((ASTIdentifier) node.jjtGetChild(i)).getValue();
+
+            AddToSymbolTable(childName, VarType.EnumValue);
+        }
+
         return null;
     }
 
@@ -493,6 +563,10 @@ public class SemantiqueVisitor implements ParserVisitor
         else if (varType.equals("bool"))
             return VarType.Bool;
 
+        // Look for the name in the symbol table to see if it's an enum
+
+        if (SymbolTable.containsKey(varType) && SymbolTable.get(varType) == VarType.EnumType)
+            return VarType.EnumVar;
 
         return VarType.Unknown;
     }
