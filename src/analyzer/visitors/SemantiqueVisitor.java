@@ -141,6 +141,9 @@ public class SemantiqueVisitor implements ParserVisitor
     {
         // TODO
         this.IF++;
+
+        node.childrenAccept(this, data);
+
         return null;
     }
 
@@ -149,6 +152,9 @@ public class SemantiqueVisitor implements ParserVisitor
     {
         // TODO
         this.WHILE++;
+
+        node.childrenAccept(this, data);
+
         return null;
     }
 
@@ -207,11 +213,11 @@ public class SemantiqueVisitor implements ParserVisitor
         */
         // TODO
 
+        node.childrenAccept(this, data);
+
         if (node.jjtGetNumChildren() > 1)
             this.OP += node.jjtGetNumChildren() - 1;
 
-
-        node.childrenAccept(this, data);
 
         return null;
     }
