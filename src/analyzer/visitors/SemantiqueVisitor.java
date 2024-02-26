@@ -81,7 +81,8 @@ public class SemantiqueVisitor implements ParserVisitor
     @Override
     public Object visit(ASTProgram node, Object data)
     {
-        node.childrenAccept(this, data);
+        DataStruct d = new DataStruct();
+        node.childrenAccept(this, d);
         this.VAR = SymbolTable.size();
         m_writer.print(String.format("{VAR:%d, WHILE:%d, IF:%d, ENUM_VALUES:%d, OP:%d}", this.VAR, this.WHILE, this.IF, this.ENUM_VALUES, this.OP));
         return null;
@@ -163,9 +164,18 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTAssignStmt node, Object data)
     {
         String varName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
-
+        SemantiqueVisitor.VarType varType = SymbolTable.get(varName);
         // TODO
-        node.childrenAccept(this, data);
+
+        node.jjtGetChild(1).jjtAccept(this, data);
+
+        DataStruct d = (DataStruct) data;
+
+        if(d.type != varType)
+        {
+            throw new SemantiqueError(String.format("Invalid type in assignation of Identifier %s", varName));
+        }
+
         return null;
     }
 
@@ -196,8 +206,8 @@ public class SemantiqueVisitor implements ParserVisitor
     {
         // EXPRESSION BASE
         // TODO
-        DataStruct d = new DataStruct();
-        node.childrenAccept(this, d);
+
+        node.childrenAccept(this, data);
         return null;
     }
 
@@ -353,7 +363,7 @@ public class SemantiqueVisitor implements ParserVisitor
 
         for (int i = 0; i < numChildren; i++)
         {
-            DataStruct d = new DataStruct();
+            DataStruct d = (DataStruct) data;
             node.jjtGetChild(i).jjtAccept(this, d);
 
             if (firstType == VarType.Unknown)
@@ -367,41 +377,6 @@ public class SemantiqueVisitor implements ParserVisitor
                 }
             }
         }
-
-//        else
-//        {
-//            int numChildren = node.jjtGetNumChildren();
-//
-//            VarType firstType = VarType.Unknown;
-//
-//            for (int i = 0; i < numChildren; i++)
-//            {
-//                int oldCounter = this.OP;
-//
-//                DataStruct childDataStruct = new DataStruct();
-//                node.jjtGetChild(i).jjtAccept(this, childDataStruct);
-//
-//                this.OP = oldCounter;
-//
-//                if (firstType == VarType.Unknown)
-//                {
-//                    firstType = childDataStruct.type; // First initialization
-//
-//                    if (firstType != VarType.Number && firstType != VarType.Bool)
-//                    {
-//                        throw new SemantiqueError("Invalid type in expression");
-//                    }
-//
-//                } else
-//                {
-//                    if (childDataStruct.type != firstType)
-//                    {
-//                        throw new SemantiqueError("Invalid type in expression");
-//                    }
-//                }
-//
-//            }
-//        }
 
         if (numberOfOps > 0)
         {
