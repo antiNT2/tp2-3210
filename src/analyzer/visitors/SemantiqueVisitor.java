@@ -145,6 +145,11 @@ public class SemantiqueVisitor implements ParserVisitor
 
         node.childrenAccept(this, data);
 
+        if (((DataStruct)data).type != VarType.Bool)
+        {
+            throw new SemantiqueError("Invalid type in condition");
+        }
+
         return null;
     }
 
@@ -155,6 +160,11 @@ public class SemantiqueVisitor implements ParserVisitor
         this.WHILE++;
 
         node.childrenAccept(this, data);
+
+        if (((DataStruct)data).type != VarType.Bool)
+        {
+            throw new SemantiqueError("Invalid type in condition");
+        }
 
         return null;
     }
