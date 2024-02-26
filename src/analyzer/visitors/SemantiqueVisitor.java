@@ -271,6 +271,17 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTSwitchStmt node, Object data)
     {
         // TODO
+        String switchVarName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
+        VarType varType = SymbolTable.get(switchVarName);
+
+        ((DataStruct) data).type = varType;
+
+        if (varType != VarType.Number && varType != VarType.EnumVar)
+        {
+            throw new SemantiqueError(String.format("Invalid type in switch of Identifier %s", switchVarName));
+        }
+
+        node.childrenAccept(this, data);
         return null;
     }
 
@@ -278,6 +289,47 @@ public class SemantiqueVisitor implements ParserVisitor
     public Object visit(ASTCaseStmt node, Object data)
     {
         // TODO
+
+        Node caseNode = node.jjtGetChild(0);
+
+        DataStruct d = new DataStruct();
+        caseNode.jjtAccept(this, d);
+
+
+        String caseVar = "TODO";
+
+        VarType switchVarType = ((DataStruct) data).type;
+
+        VarType caseVarType = d.type;
+
+        String prefix = "integer";
+
+        if (caseNode instanceof ASTIdentifier)
+        {
+            caseVar = ((ASTIdentifier) caseNode).getValue();
+            caseVarType = SymbolTable.get(caseVar);
+            prefix = "Identifier";
+        } else if (caseNode instanceof ASTIntValue)
+        {
+            caseVar = Integer.toString(((ASTIntValue) caseNode).getValue());
+            prefix = "integer";
+        }
+
+        if (switchVarType == VarType.EnumVar)
+        {
+            if (caseVarType != VarType.EnumValue)
+            {
+                throw new SemantiqueError(String.format("Invalid type in case of %s %s", prefix, caseVar));
+            }
+        } else
+        {
+            if (caseVarType != switchVarType)
+            {
+                throw new SemantiqueError(String.format("Invalid type in case of %s %s", prefix, caseVar));
+            }
+        }
+
+
         return null;
     }
 
